@@ -211,6 +211,112 @@ curl -X POST http://localhost:3000/api/orchestrate \
 
 Or use the UI at `http://localhost:3000` to enter API sources and click "Run Tests".
 
+### 6. Using the UI - Step by Step with Examples
+
+Open your browser to `http://localhost:3000` and follow these steps:
+
+#### Example 1: Empty Sources (Quick Test)
+
+1. **Leave the textarea empty or enter `[]`**
+   - This tests the pipeline without actual API sources
+   - Useful for verifying the system works end-to-end
+
+2. **Click "Run Tests"**
+   - The button will show "Running..." while processing
+   - Wait for the results section to appear
+
+3. **View Results**
+   - The Results section shows all 10 agent outputs
+   - Without LLM gateway, you'll see empty responses with `NO_TEST_CODE` in execution
+
+#### Example 2: OpenAPI Specification URL
+
+```json
+[{"url": "https://petstore3.swagger.io/api/v3/openapi.json"}]
+```
+
+This will:
+- Fetch the Petstore OpenAPI spec
+- Analyze endpoints (/pet, /store, /user)
+- Generate tests for CRUD operations
+- Execute tests (will fail since we're testing against real unauthorized API)
+- Generate reports based on results
+
+#### Example 3: Multiple API Sources
+
+```json
+[
+  {"url": "https://jsonplaceholder.typicode.com/swagger"},
+  {"type": "postman", "url": "https://api.example.com/collection.json"},
+  {"type": "openapi", "content": "inline spec content"}
+]
+```
+
+#### Example 4: GitHub Repository with API Definitions
+
+```json
+[
+  {"type": "github", "url": "https://github.com/user/api-specs", "path": "openapi.yaml"}
+]
+```
+
+#### UI Input Field Guide
+
+| Field | Description | Example |
+|-------|-------------|---------|
+| `url` | OpenAPI/Postman collection URL | `"https://api.example.com/openapi.json"` |
+| `type` | Source type (openapi, postman, github, azure) | `"openapi"` |
+| `content` | Inline specification content | `"content": "# yaml spec"` |
+| `path` | File path within repo (for GitHub/Azure) | `"spec/api.yaml"` |
+
+### 7. Response Format
+
+The `/api/orchestrate` endpoint returns a JSON object with these keys:
+
+```json
+{
+  "apiDiscovery": "...",     // Discovered API catalog
+  "specAnalysis": "...",     // Testing strategy
+  "testData": "...",         // Generated test data
+  "testGeneration": "...",   // Generated Java test code
+  "execution": "...",        // JUnit execution results
+  "validation": "...",       // SLA validation results
+  "failureAnalysis": "...",  // Root cause analysis
+  "jira": "PROJ-1234",     // Jira ticket key (if created)
+  "reporting": "...",        // HTML report content
+  "optimization": "...",   // Optimization suggestions
+  "finalContext": {...},    // All intermediate data
+  "pdfReportBase64": "...", // PDF report (base64)
+  "excelReportBase64": "..." // Excel report (base64)
+}
+```
+
+### 8. Testing with LLM Enabled
+
+Set these environment variables before starting the backend for full functionality:
+
+**Windows (PowerShell):**
+```powershell
+$env:LLM_GATEWAY_URL = "https://api.groq.com/openai/v1"
+$env:LLM_API_KEY = "your-groq-api-key"
+$env:JIRA_URL = "https://your-company.atlassian.net"
+$env:JIRA_USER = "your-email@example.com"
+$env:JIRA_TOKEN = "your-jira-token"
+$env:JIRA_PROJECT = "API"
+```
+
+**Linux/macOS:**
+```bash
+export LLM_GATEWAY_URL="https://api.groq.com/openai/v1"
+export LLM_API_KEY="your-groq-api-key"
+export JIRA_URL="https://your-company.atlassian.net"
+export JIRA_USER="your-email@example.com"
+export JIRA_TOKEN="your-jira-token"
+export JIRA_PROJECT="API"
+```
+
+Then restart the backend and run tests.
+
 ## Test Case Execution Flow
 
 1. **Frontend** sends POST request to `/api/orchestrate` with `apiSources` JSON array
