@@ -44,6 +44,9 @@ yarn-error.log*
 dist/
 build/
 
+# Claude Code settings (contains API keys)
+.claude/
+
 # Environment files
 .env.local
 .env.*.local
