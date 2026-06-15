@@ -1,0 +1,21 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+llm:
+  gateway:
+    url: ${LLM_GATEWAY_URL:}
+    api-key: ${LLM_API_KEY:}
+
+jira:
+  url: ${JIRA_URL:}
+  user: ${JIRA_USER:}
+  token: ${JIRA_TOKEN:}
+  project: ${JIRA_PROJECT:API}
